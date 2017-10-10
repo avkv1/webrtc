@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>WebRTC client</title>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+</head>
+<body>
+
+<h1>Here is the link to chat: <a href="/channel/{%channel%}" target="_blank">http://localhost:8080/channel/{%channel%}</a></h1>
+
+<div class="container">
+    <div class="row">
+        <div class="col-lg-4">
+            <h2>Me</h2>
+            <video id="selfView" width="320" height="240" autoplay style="display: inline;"></video>
+        </div>
+        <div class="col-lg-8">
+            <h2>Remote</h2>
+            <video id="remoteView" width="640" height="480" autoplay style="display: inline;"></video>
+        </div>
+    </div>
+</div>
+
+<script>
+    var clientProps = {
+        username: "{%username%}",
+        channel: "{%channel%}",
+    };
+</script>
+
+
+<div class="text-center">
+    <div>
+        <h4>Chat status:</h4>
+        <div id="status" style="width: 100px; border: 1px solid #000; margin: 0 auto; padding: 5px;">
+
+        </div>
+    </div>
+    <div style="margin-top: 10px;"></div>
+    <button id="joinButton" class="btn btn-success">Join to chat</button>
+    <button id="disconnectButton" class="btn btn-danger">Disconnect</button>
+</div>
+
+<script src='/chat.js'></script>
+
+<script>
+    $('#disconnectButton').hide();
+
+    var sentOffs = [];
+
+    function updateStatus() {
+        $.getJSON( "/api/status/{%channel%}", function( data ) {
+
+            if (data.online > 0 && loggedIn){
+//
+                data.clients.forEach(function (it) {
+                    if (it !== clientProps.username){
+                        var alreadySent = false;
+                        for (var offIdx in sentOffs){
+                            if (sentOffs[offIdx] === it){
+                                alreadySent = true;
+                            }
+                        }
+
+                        if (!alreadySent){
+                            console.log("send offer to : "+it);
+                            offer(it);
+                            sentOffs.push(it);
+                        }
+
+                    }
+                });
+
+            }
+
+
+            $('#status').empty();
+
+            var items = [];
+            $.each( data, function( key, val ) {
+                items.push( "<p>" + key + ":" + val + "</p>" );
+            });
+
+            $( "<div/>", {
+                "class": "text-left",
+                html: items.join( "" )
+            }).appendTo( "#status" );
+        });
+
+    }
+
+    function leaveChannel() {
+        if (!loggedIn) return;
+        $('#joinButton').show();
+        $('#disconnectButton').hide();
+
+        disconnect();
+
+    }
+
+
+    function joinChannel() {
+        if (loggedIn) return;
+        $.getJSON( "/api/status/{%channel%}", function( data ) {
+
+            connect(clientProps.username);
+            startRTC();
+
+
+        });
+
+        $('#joinButton').hide();
+        $('#disconnectButton').show();
+
+    }
+
+    setInterval(updateStatus, 1000);
+    updateStatus();
+
+    $('#joinButton').click(joinChannel);
+    $('#disconnectButton').click(leaveChannel);
+
+</script>
+
+
+</body>
+</html>

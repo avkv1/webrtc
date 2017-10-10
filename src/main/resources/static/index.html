@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>WebRTC Demo</title>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+</head>
+<body>
+
+<div class="container">
+
+    <div class="row">
+
+        <div class="col-lg-12">
+
+
+            <h1 class="text-center">WebRTC Signaling Server</h1>
+            <h2 class="text-center">DEMO</h2>
+
+            <BR><BR><BR>
+
+        </div>
+
+    </div>
+
+    <div class="row">
+
+        <div class="col-lg-4">
+
+        </div>
+
+        <div class="col-lg-4">
+            <div class="input-group">
+                <span class="input-group-addon" id="basic-addon3">http://localhost:8080/</span>
+                <input type="text" class="form-control" id="channelName" aria-describedby="basic-addon3" placeholder="channel name" value="test">
+                <span class="input-group-btn">
+                    <button class="btn btn-primary" id="startButton">Start a chat</button>
+                </span>
+            </div>
+
+        </div>
+
+        <div class="col-lg-4">
+
+        </div>
+
+
+    </div>
+
+    <div class="row">
+
+        <div class="col-lg-4">
+
+        </div>
+
+        <div class="col-lg-4">
+
+            <BR>
+            <h3>Opened channels:</h3>
+            <div id="channels-list"></div>
+
+        </div>
+
+        <div class="col-lg-4">
+
+        </div>
+
+
+    </div>
+
+</div>
+
+<script>
+
+    $(document).ready(function() {
+
+        $.getJSON( "/api/channels", function( data ) {
+            var items = [];
+            $.each( data, function( key, val ) {
+                items.push( "<li id='" + key + "'><a href='/channel/"+ val +"'>" + val + "</a></li>" );
+            });
+
+            $( "<ul/>", {
+                "class": "my-new-list",
+                html: items.join( "" )
+            }).appendTo( "#channels-list" );
+        });
+
+
+        $("#startButton").click(function() {
+            if ($("#channelName").val() === '') return;
+            location.href = "/channel/"+$("#channelName").val();
+        });
+    });
+
+</script>
+
+</body>
+</html>
