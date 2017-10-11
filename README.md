@@ -1,5 +1,5 @@
-# webrtc
-WebRTC Signalling server + simple client implementation
+# WebRTC
+WebRTC signalling server + simple client implementation
 
 ## How to launch
 
